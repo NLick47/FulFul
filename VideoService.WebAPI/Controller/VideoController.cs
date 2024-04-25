@@ -16,7 +16,7 @@ using VideoService.Infrastructure.Response;
 namespace VideoService.WebAPI.Controller
 {
    
-    [Route("[controller]/[action]")]
+    [Route("/api/[controller]/[action]")]
     [ApiController]
     public class VideoController : ControllerBase
     {
@@ -60,7 +60,7 @@ namespace VideoService.WebAPI.Controller
             if(videos.Count == 0) return Results.Json(new { result = true, mesg = "没有更多了" });
             List<long> ids = videos.Select(x => x.CreateUserId).ToList();
          
-            string res = await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
+            string res = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
             List<UserVm> vms = JsonConvert.DeserializeObject<List<UserVm>>(res);  
             List<VideoListVm> videoVms = videos
                 .Zip(vms, (video, user) => new VideoListVm() { Title = video.Title,CreateTime = video.CreateTime
@@ -74,13 +74,16 @@ namespace VideoService.WebAPI.Controller
         [HttpGet("{id}")]
         public async Task<IResult> GetVideo(int id)
         {
+            Video video = await videoDbContext.Video.Include(x => x.VideoResouce).SingleOrDefaultAsync(x => x.Id == id);
+            if (video is null) return Results.Json(new {result = false, mesg ="视频找不到了"});
             var us = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+           
             bool isLikeed = false;
             bool isColled = false;
             if (us is null)
             {
                 int ip = ConvertHelper.Ipv4ToInt(accessor.HttpContext.Connection.RemoteIpAddress);
-                isLikeed = await videoDbContext.TouristLikes.AnyAsync(x => x.VideoId == id && x.Tourist.Ip == ip);
+                isLikeed = await videoDbContext.TouristLike.AnyAsync(x => x.videoId == id && x.Ip == ip);
             }
             else
             { 
@@ -93,11 +96,11 @@ namespace VideoService.WebAPI.Controller
                 isLikeed = await videoDbContext.VideoLikes.AnyAsync(x => x.VideoId == id && x.UserId == us_id);
             }
            
-            Video video = await videoDbContext.Video.Include(x => x.VideoResouce).SingleAsync(x => x.Id == id);
+           
             UserVm userVm = null;
             try
             {
-                string res = await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
+                string res = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
                 userVm = JsonConvert.DeserializeObject<List<UserVm>>(res)[0];
             }
             catch (Exception e)
@@ -125,37 +128,7 @@ namespace VideoService.WebAPI.Controller
             return Results.Json(new { result = true, data = vm });
         }
       
-        [HttpGet]
-            public async Task<IActionResult> GetKey(string ott)
-            {
-                if (string.IsNullOrEmpty(ott) || ott.Length < 32)
-                {
-                    return NotFound();
-                }
-
-                var hexkey = await videoDbContext.videoResouces.SingleOrDefaultAsync(x => x.Id == ott);
-                if (hexkey == null)
-                {
-                    _logger.LogInformation($"No resource found with ID: {ott}");
-                    return NotFound();
-                }
-
-                try
-                {
-                    byte[] keyBytes = Enumerable.Range(0, hexkey.Key.Length)
-                        .Where(x => x % 2 == 0)
-                        .Select(x => Convert.ToByte(hexkey.Key.Substring(x, 2), 16))
-                        .ToArray();
-               string  s = BitConverter.ToString(keyBytes);
-               return File(keyBytes, "application/octet-stream");
-               
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error converting hexkey to bytes: {ex}");
-                    return StatusCode(500, "Error processing the key");
-                }
-            }
+       
 
         [HttpPut("{videoId}")]
         public async Task<IActionResult> Like(int videoId)
@@ -168,40 +141,17 @@ namespace VideoService.WebAPI.Controller
             {
                 if (us is null)
                 {
-                    int ip = ConvertHelper.Ipv4ToInt(accessor.HttpContext.Connection.RemoteIpAddress);
-                    var tou = await videoDbContext.Tourists.Include(x => x.VideoLikes).Where(x => x.Ip == ip).SingleOrDefaultAsync();
-                    if (tou is null)
+                   int ip = ConvertHelper.Ipv4ToInt(accessor.HttpContext.Connection.RemoteIpAddress);
+                    var tour_like = await videoDbContext.TouristLike.SingleOrDefaultAsync(x => x.Ip == ip && x.videoId == videoId);
+                    if(tour_like is null)
                     {
+                        await  videoDbContext.TouristLike.AddAsync(new TouristLike {Ip=ip,videoId=videoId });
                         video.LikeVideo();
-                        VideoTouristLike newLike = new VideoTouristLike
-                        {
-                            Tourist = new Tourist() {Ip = ip },
-                            VideoId = videoId,
-                            Video = video,
-                            LikeTime = DateTime.Now
-                        };
-                        videoDbContext.TouristLikes.Add(newLike);
-                    }
-                    else
+
+                    }else
                     {
-                        
-                        if (tou.VideoLikes.Any(x => x.Video.Id == videoId))
-                        {
-                            video.CancelLike();
-                            videoDbContext.Tourists.Remove(tou);
-                        }
-                        else
-                        {
-                            video.LikeVideo();
-                            tou.VideoLikes.Add(new VideoTouristLike
-                            {
-                                Tourist = new Tourist() { Ip = ip },
-                                VideoId = videoId,
-                                Video = video,
-                                LikeTime = DateTime.Now
-                            });
-                           await videoDbContext.Tourists.AddAsync(tou);
-                        }
+                         videoDbContext.TouristLike.Remove(tour_like);
+                        video.CancelLike();
                     }
                 }
                 else

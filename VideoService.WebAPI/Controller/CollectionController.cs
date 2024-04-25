@@ -44,12 +44,12 @@ namespace VideoService.WebAPI.Controller
         }
 
 
-        [HttpPut("{videId}")]
-        public async Task<IActionResult> Remove(int videId)
+        [HttpPut("{videoId}")]
+        public async Task<IActionResult> Remove(int videoId)
         {
             long us_id = long.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var video = await _db.Video.SingleOrDefaultAsync(x => x.Id == videId);
-            var items = await _db.Collections.Include(x => x.Item).Where(x => x.CreateUserId == us_id).Where(x => x.Item.Any(v => v.VideoId == videId)).SingleAsync();
+            var video = await _db.Video.SingleOrDefaultAsync(x => x.Id == videoId);
+            var items = await _db.Collections.Include(x => x.Item).Where(x => x.CreateUserId == us_id).Where(x => x.Item.Any(v => v.VideoId == videoId)).SingleOrDefaultAsync();
             _db.Video.Update(video.RemoveCollect());
             this._db.CollectionItems.Remove(items.Item[0]);
             _db.SaveChanges();

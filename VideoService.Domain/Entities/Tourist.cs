@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace VideoService.Domain.Entities
 {
-    public class Tourist
+    public class TouristLike
     {
         public int Id { get; set; }
        
         public int Ip { get; set; }
 
-        public List<VideoTouristLike> VideoLikes { get; set; }
+       public int videoId { get; set; }
 
     }
 }

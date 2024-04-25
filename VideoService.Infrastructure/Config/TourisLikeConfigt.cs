@@ -5,11 +5,11 @@ using VideoService.Domain.Entities;
 
 namespace VideoService.Infrastructure.Config
 {
-    public class TourisConfigt : IEntityTypeConfiguration<Tourist>
+    public class TourisLikeConfigt : IEntityTypeConfiguration<TouristLike>
     {
-        public void Configure(EntityTypeBuilder<Tourist> builder)
+        public void Configure(EntityTypeBuilder<TouristLike> builder)
         {
-           
+            builder.HasIndex(x => x.videoId).IsUnique(false);
         }
     }
 }

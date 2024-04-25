@@ -59,13 +59,13 @@ namespace VideoService.WebAPI.Controller
 
             if (repsIds.Count > 0)
             {
-                string repUserstr = await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints="
+                string repUserstr = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints="
                + JsonConvert.SerializeObject(repsIds));
                 repUser = JsonConvert.DeserializeObject<List<UserVm>>(repUserstr);
             }
             if(comIds.Count > 0)
             {
-                string comUserstr = await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints="
+                string comUserstr = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints="
            + JsonConvert.SerializeObject(comIds));
                 comUser = JsonConvert.DeserializeObject<List<UserVm>>(comUserstr);
             }
@@ -103,7 +103,7 @@ namespace VideoService.WebAPI.Controller
             {
                 entity =  await videoDb.VideoComment.AddAsync(new Domain.Entities.VideoComment(request.text,user_id,request.videoId));
                 await videoDb.SaveChangesAsync();
-                user = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints=[" + user_id + "]"))[0];
+                user = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=[" + user_id + "]"))[0];
             }
             catch (HttpRequestException e)
             {
@@ -151,8 +151,17 @@ namespace VideoService.WebAPI.Controller
             if (!addReplyvalidator.Validate(request).IsValid) return BadRequest();
             long user_id = long.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var comm = await videoDb.VideoComment.Where(x => x.Id==request.commId).SingleOrDefaultAsync();
+            UserVm vm = null;
             if (comm is null) return Ok(new { result = false,mesg = "评论不见了"});
-            UserVm vm = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://localhost:8080/user/getusersbyids?ints=[" + user_id + "]"))[0];
+            try
+            {
+                vm = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=[" + user_id + "]"))[0];
+            }
+            catch (Exception e)
+            {
+                vm = new UserVm().Default();
+                logger.LogInterpolatedError($"用户信息获取错误",e);
+            }
             await videoDb.CommentReply.AddAsync(new CommentReply(request.text,request.commId, user_id));
             await videoDb.SaveChangesAsync();
             return Ok(new { result = true,data = new CommentRepose.Reply() {Id= comm.Replys[0].Id,Content = comm.Replys[0].Content,

@@ -1,8 +1,6 @@
 using Bli.Common;
 using CommonInitializer;
-
-
-
+using Microsoft.AspNetCore.Mvc;
 using VideoService.Domain.Options;
 using VideoService.WebAPI.BgService;
 
@@ -15,8 +13,6 @@ builder.ConfigureExtraServices(new InitializerOptions
     LogFilePath = "e:/temp/IdentityService.log"
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.
-Serialization.ReferenceHandler.IgnoreCycles);
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "VideoService.WebAPI", Version = "v1" });

@@ -17,7 +17,7 @@ namespace VideoService.Infrastructure
 
         public DbSet<CollectionItem> CollectionItems { get; set; }
 
-        public DbSet<Tourist> Tourists { get; set; }
+        public DbSet<TouristLike> TouristLike { get; set; }
 
         public DbSet<VideoComment> VideoComment { get; set; }
 
@@ -27,7 +27,7 @@ namespace VideoService.Infrastructure
 
         public DbSet<VideoLike> VideoLikes { get; set; }
 
-        public DbSet<VideoTouristLike> TouristLikes { get; set; }
+      
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

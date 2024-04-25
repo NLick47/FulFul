@@ -65,24 +65,16 @@ namespace VideoService.Domain.Entities
         //收藏数量
         public int CollectCount { get;private set; }
 
-        public List<VideoTouristLike> TouristLikes { get; private set; } = new List<VideoTouristLike>();
+      
         public Video SetCoverUri(string url)
         {
             this.CoverUri = url?.Replace("\\","/");
             return this;
         }
 
-        public Video AddTouristLikes(VideoTouristLike like)
-        {
-            TouristLikes.Add(like);
-            return this;
-        }
+      
 
-        public Video RemoveTouristLikes(VideoTouristLike like)
-        {
-            TouristLikes.Remove(like);
-            return this;
-        }
+        
 
         public Video AddComments(VideoComment comment)
         {

@@ -40,7 +40,13 @@ namespace CommonInitializer
             {
                 c.AddAuthenticationHeader();
             });
-           
+
+            builder.Services.AddControllers(opt =>
+            {
+                // 统一设置路由前缀
+                opt.UseCentralRoutePrefix(new RouteAttribute("api"));
+
+            }).AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 
             services.Configure<JsonOptions>(options =>
             {

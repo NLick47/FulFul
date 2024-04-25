@@ -17,7 +17,6 @@ namespace DanmakuService.WebApi
                 EventBusQueueName = "VideoService.WebAPI",
                 LogFilePath = "e:/temp/IdentityService.log"
             }); 
-            builder.Services.AddControllers();
             // Add services to the container.
             builder.Services.AddAuthorization();
            var s= builder.Configuration.GetSection("MongoDbSettings");
