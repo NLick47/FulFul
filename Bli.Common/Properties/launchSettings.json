@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Bli.Common": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:55327;http://localhost:55330"
+    }
+  }
+}
