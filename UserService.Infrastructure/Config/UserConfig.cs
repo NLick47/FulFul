@@ -14,10 +14,6 @@ namespace IdentityService.Infrastructure.Config
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("T_Users");
-      
-           
         }
-
-       
     }
 }

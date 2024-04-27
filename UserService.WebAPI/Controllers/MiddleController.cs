@@ -28,9 +28,9 @@ namespace MiddleServiceWebApi.Controllers
             if (ip is not null)
             {
                 var db = redisConn.GetDatabase();
-                string code = VerificationCode.GetRodomCode();
+                (var img,var code) = VerificationCode.GetCaptcha();
                 var b = await db.StringSetAsync(ip, code,TimeSpan.FromSeconds(120));
-                return Results.Json(new { baseimg = VerificationCode.CreateCodeForBase64(code).base64 });
+                return Results.Json(new { baseimg = img });
             }
             
             return Results.Json(new { error = "哦哦什么原因呢?" });

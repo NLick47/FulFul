@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  webapi1:
+    build: VideoService.WebAPI
+    ports:
+      - "8001:80"
+  webapi2:
+    build: DanmakuService.WebApi
+    ports:
+      - "8002:80"
+  webapi3:
+    build: UserService.WebAPI
+    ports:
+      - "8003:80"

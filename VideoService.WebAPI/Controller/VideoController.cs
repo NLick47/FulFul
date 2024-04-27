@@ -60,7 +60,7 @@ namespace VideoService.WebAPI.Controller
             if(videos.Count == 0) return Results.Json(new { result = true, mesg = "没有更多了" });
             List<long> ids = videos.Select(x => x.CreateUserId).ToList();
          
-            string res = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
+            string res = await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
             List<UserVm> vms = JsonConvert.DeserializeObject<List<UserVm>>(res);  
             List<VideoListVm> videoVms = videos
                 .Zip(vms, (video, user) => new VideoListVm() { Title = video.Title,CreateTime = video.CreateTime
@@ -100,7 +100,7 @@ namespace VideoService.WebAPI.Controller
             UserVm userVm = null;
             try
             {
-                string res = await client.GetStringAsync("http://localhost:8080/api/user/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
+                string res = await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
                 userVm = JsonConvert.DeserializeObject<List<UserVm>>(res)[0];
             }
             catch (Exception e)

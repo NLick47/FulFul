@@ -1,0 +1,27 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["DanmakuService.WebApi/DanmakuService.WebApi.csproj", "DanmakuService.WebApi/"]
+COPY ["../CommonInitializer/CommonInitializer.csproj", "CommonInitializer/"]
+COPY ["../Bli.JWT/Bli.JWT.csproj", "Bli.JWT/"]
+COPY ["../Bli.Common/Bli.Common.csproj", "Bli.Common/"]
+COPY ["../DanmakuService.Infrastructure/DanmakuService.Infrastructure.csproj", "DanmakuService.Infrastructure/"]
+COPY ["../DanmakuService.Domain/DanmakuService.Domain.csproj", "DanmakuService.Domain/"]
+RUN dotnet restore "DanmakuService.WebApi/DanmakuService.WebApi.csproj"
+COPY . .
+WORKDIR "/src/DanmakuService.WebApi"
+RUN dotnet build "DanmakuService.WebApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "DanmakuService.WebApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "DanmakuService.WebApi.dll"]

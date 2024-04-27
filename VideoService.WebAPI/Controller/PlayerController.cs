@@ -62,6 +62,8 @@ namespace VideoService.WebAPI.Controller
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
+        /// 
+       
         [HttpPost]
         public async Task<IActionResult> RemoveResouce([FromBody]Dictionary<string,int> keys)
         {
@@ -74,7 +76,7 @@ namespace VideoService.WebAPI.Controller
             await redisConn.GetDatabase().SetAddAsync("delete_resource",video_id);
             return Ok(new { result = true});
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Key(string ott)
         {

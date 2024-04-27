@@ -1,0 +1,27 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["UserService.WebAPI/UserService.WebAPI.csproj", "UserService.WebAPI/"]
+COPY ["UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]
+COPY ["Bli.JWT/Bli.JWT.csproj", "Bli.JWT/"]
+COPY ["Bli.Common/Bli.Common.csproj", "Bli.Common/"]
+COPY ["CommonInitializer/CommonInitializer.csproj", "CommonInitializer/"]
+COPY ["UserService.Infrastructure/UserService.Infrastructure.csproj", "UserService.Infrastructure/"]
+RUN dotnet restore "UserService.WebAPI/UserService.WebAPI.csproj"
+COPY . .
+WORKDIR "/src/UserService.WebAPI"
+RUN dotnet build "UserService.WebAPI.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "UserService.WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "UserService.WebAPI.dll"]
