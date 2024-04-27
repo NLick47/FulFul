@@ -37,19 +37,19 @@ public class VerificationCode
 
                 using (SKPaint textPaint = new SKPaint())
                 {
-                    textPaint.TextSize = 20;
-
+                    textPaint.TextSize = 25;
+                    textPaint.Typeface = SKTypeface.FromFile( "Fonts/BRITANIC.TTF");
                     float offsetX = 0; // 初始化偏移量
 
 
                     for (int i = 0; i < captchaText.Length; i++)
                     {
                         SKColor randomColor = new SKColor((byte)random.Next(256), (byte)random.Next(256), (byte)random.Next(256)); 
-  
+ 
+
                         textPaint.Color = randomColor;
                         SKPoint textPosition = new SKPoint(10 + i * 25, 30); // 设置文字位置，每个字符水平间距为25
-
-                        canvas.DrawText(captchaText[i].ToString(), textPosition, textPaint);
+                        canvas.DrawText(captchaText[i].ToString(),textPosition, textPaint);
                     }
 
                     // 添加干扰线

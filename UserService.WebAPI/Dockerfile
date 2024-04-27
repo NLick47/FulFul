@@ -6,6 +6,8 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+
 WORKDIR /src
 COPY ["UserService.WebAPI/UserService.WebAPI.csproj", "UserService.WebAPI/"]
 COPY ["UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]

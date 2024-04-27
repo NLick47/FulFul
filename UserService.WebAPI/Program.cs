@@ -29,12 +29,7 @@ builder.Services.Configure<EmialSmtpSettings>(s);
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromSeconds(120);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "IdentityService.WebAPI", Version = "v1" });
@@ -75,13 +70,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (builder.Environment.IsDevelopment())
 {
+    app.UseCors();//启用Cors
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IdentityService.WebAPI v1"));
 }
 //app.UseEventBus();
-app.UseSession();
-app.UseCors();//启用Cors
+
+
 app.UseForwardedHeaders();
 
 //app.UseHttpsRedirection();//不能与ForwardedHeaders很好的工作，而且webapi项目也没必要配置这个
