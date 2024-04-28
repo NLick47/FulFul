@@ -16,6 +16,8 @@ COPY ["VideoService.Infrastructure/VideoService.Infrastructure.csproj", "VideoSe
 RUN dotnet restore "VideoService.WebAPI/VideoService.WebAPI.csproj"
 COPY . .
 WORKDIR "/src/VideoService.WebAPI"
+RUN ["apt-get", "--assume-yes", "update"]
+RUN ["apt-get", "--assume-yes", "install", "ffmpeg"] 
 RUN dotnet build "VideoService.WebAPI.csproj" -c Release -o /app/build
 
 FROM build AS publish
