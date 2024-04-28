@@ -58,7 +58,7 @@ namespace VideoService.WebAPI.BgService
         {
             VideoAspectRatio = VideoAspectRatio.R16_9,
             VideoSize = FFmpeg.NET.Enums.VideoSize.Hd720,
-            VideoBitRate = 400
+            VideoBitRate = 400,
         };
 
         private readonly ConversionOptions lowOptions = new ConversionOptions

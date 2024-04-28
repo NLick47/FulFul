@@ -1,10 +1,9 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
+FROM jrottenberg/ffmpeg:4.3 AS ffmpeg_builder
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
-
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["VideoService.WebAPI/VideoService.WebAPI.csproj", "VideoService.WebAPI/"]
@@ -16,8 +15,6 @@ COPY ["VideoService.Infrastructure/VideoService.Infrastructure.csproj", "VideoSe
 RUN dotnet restore "VideoService.WebAPI/VideoService.WebAPI.csproj"
 COPY . .
 WORKDIR "/src/VideoService.WebAPI"
-RUN ["apt-get", "--assume-yes", "update"]
-RUN ["apt-get", "--assume-yes", "install", "ffmpeg"] 
 RUN dotnet build "VideoService.WebAPI.csproj" -c Release -o /app/build
 
 FROM build AS publish
