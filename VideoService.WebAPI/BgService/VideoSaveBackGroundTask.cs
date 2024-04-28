@@ -88,18 +88,15 @@ namespace VideoService.WebAPI.BgService
         {
             var db = redisConn.GetDatabase();
             ffmpeg.Error += OnError;
-
-           
             while (!stoppingToken.IsCancellationRequested)
             {
                 var readyVideo = await db.SetMembersAsync("video_transcoding_ready");
                 foreach(var fileName in readyVideo)
                 {
+                    string input_file = Path.Combine(fileService.Value.RootPath, RawVideoPath, fileName, fileName);
+                    string out_folder = Path.Combine(fileService.Value.RootPath, transcodingSavePath, fileName);
                     try
                     {
-
-                        string input_file = Path.Combine(fileService.Value.RootPath, RawVideoPath, fileName, fileName);
-                        string out_folder = Path.Combine(fileService.Value.RootPath, transcodingSavePath, fileName);
                         var meta = await ffmpeg.GetMetaDataAsync(new InputFile(input_file), stoppingToken);
 
                         float w = float.Parse(meta.VideoData.FrameSize.Split("x")[0]);
@@ -112,14 +109,16 @@ namespace VideoService.WebAPI.BgService
                         {
                             if((w * h) >= 1080 * 720)
                             {
-                                string ouut_Hfilepath = Path.Combine(out_folder, Guid.NewGuid() + ".mp4");
-                                string ouut_Lfilepath = Path.Combine(out_folder, Guid.NewGuid() + ".mp4");
-                                await ffmpeg.ConvertAsync(new InputFile(input_file),
-                                    new OutputFile(ouut_Hfilepath), hightOptions, stoppingToken);
+                                string ouut_Hfilepath = Path.Combine(out_folder,  "720.mp4");
+                                string ouut_Lfilepath = Path.Combine(out_folder, "480.mp4");
+                                //await ffmpeg.ConvertAsync(new InputFile(input_file),
+                                //    new OutputFile(ouut_Hfilepath), hightOptions, stoppingToken);
 
-                                await ffmpeg.ConvertAsync(new InputFile(input_file),
-                                    new OutputFile(ouut_Lfilepath), lowOptions, stoppingToken);
+                                //await ffmpeg.ConvertAsync(new InputFile(input_file),
+                                //    new OutputFile(ouut_Lfilepath), lowOptions, stoppingToken);
 
+                                ExecuteFFmpegCommand($"-i {input_file} -vf \"scale=-2:480\" -c:v libx264 -b:v 400k -maxrate 400k -bufsize 200k -preset fast -c:a copy {ouut_Lfilepath}");
+                                ExecuteFFmpegCommand($"-i {input_file} -vf \"scale=-2:480\" -c:v libx264 -b:v 1000k -maxrate 1400k -bufsize 200k -preset fast -c:a copy {ouut_Hfilepath}");
                                 resouces.Add(await VideoResource(ouut_Hfilepath, 500 * 1024, Domain.Entities.Enum.VideoSize.Hd720, true,  stoppingToken));
                                 resouces.Add(await VideoResource(ouut_Lfilepath, 500 * 1024, Domain.Entities.Enum.VideoSize.Hd480,false, stoppingToken));
                             }else
@@ -161,6 +160,7 @@ namespace VideoService.WebAPI.BgService
                     {
                         await db.SetRemoveAsync("video_transcoding_ready", fileName.ToString());
                         await db.HashDeleteAsync(fileName.ToString(), "From");
+                        //Directory.Delete(Path.Combine(fileService.Value.RootPath, RawVideoPath, fileName), true);
                     }
                     
                 }
