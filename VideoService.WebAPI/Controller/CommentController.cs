@@ -28,11 +28,12 @@ namespace VideoService.WebAPI.Controller
         private  IValidator<AddCommentRequest> addCommentvalidator;
         private  IValidator<AddReplyRequest> addReplyvalidator;
 
-      
+        private readonly IConfiguration configuration;
 
         private readonly HttpClient client;
         public CommentController(CommentRepository repository, VideoDbContext videoDb, ILogger<CommentController> logger
-            , HttpClient client, IValidator<AddReplyRequest> addReplyRequest, IValidator<AddCommentRequest> addComment)
+            , HttpClient client, IValidator<AddReplyRequest> addReplyRequest, IValidator<AddCommentRequest> addComment,
+            IConfiguration configuration)
         {
             this.repository = repository;
             this.videoDb = videoDb;
@@ -40,6 +41,7 @@ namespace VideoService.WebAPI.Controller
             this.client = client;
             this.addReplyvalidator = addReplyRequest;
             this.addCommentvalidator = addComment;
+            this.configuration = configuration;
         }
         [AllowAnonymous]
         [HttpGet]
@@ -59,13 +61,13 @@ namespace VideoService.WebAPI.Controller
 
             if (repsIds.Count > 0)
             {
-                string repUserstr = await client.GetStringAsync("http://http://8.140.19.170/api/user/getusersbyids?ints="
+                string repUserstr = await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints="
                + JsonConvert.SerializeObject(repsIds));
                 repUser = JsonConvert.DeserializeObject<List<UserVm>>(repUserstr);
             }
             if(comIds.Count > 0)
             {
-                string comUserstr = await client.GetStringAsync("http://http://8.140.19.170/api/user/getusersbyids?ints="
+                string comUserstr = await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints="
            + JsonConvert.SerializeObject(comIds));
                 comUser = JsonConvert.DeserializeObject<List<UserVm>>(comUserstr);
             }
@@ -103,7 +105,7 @@ namespace VideoService.WebAPI.Controller
             {
                 entity =  await videoDb.VideoComment.AddAsync(new Domain.Entities.VideoComment(request.text,user_id,request.videoId));
                 await videoDb.SaveChangesAsync();
-                user = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=[" + user_id + "]"))[0];
+                user = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints=[" + user_id + "]"))[0];
             }
             catch (HttpRequestException e)
             {
@@ -155,7 +157,7 @@ namespace VideoService.WebAPI.Controller
             if (comm is null) return Ok(new { result = false,mesg = "评论不见了"});
             try
             {
-                vm = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=[" + user_id + "]"))[0];
+                vm = JsonConvert.DeserializeObject<List<UserVm>>(await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints=[" + user_id + "]"))[0];
             }
             catch (Exception e)
             {

@@ -1,7 +1,9 @@
 ﻿using Bli.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -26,15 +28,17 @@ namespace VideoService.WebAPI.Controller
         private readonly IHttpContextAccessor accessor;
 
         private readonly ILogger<VideoController> _logger;
+        private readonly IConfiguration configuration;
 
         public VideoController(IVideoCommentService videoCommentService, VideoDbContext videoDbContext,
-            ILogger<VideoController> logger,HttpClient client,IHttpContextAccessor accessor)
+            ILogger<VideoController> logger,HttpClient client,IHttpContextAccessor accessor,IConfiguration configuration)
         {
             this.videoCommentService = videoCommentService;
             this.videoDbContext = videoDbContext;
             this._logger = logger;
             this.client = client;
             this.accessor = accessor;
+            this.configuration = configuration;
         }
       
         [HttpGet]
@@ -59,8 +63,8 @@ namespace VideoService.WebAPI.Controller
             List<Video> videos = await query.Skip(PageSize * (curr_page - 1)).Take(PageSize).Include(x => x.VideoResouce).ToListAsync();
             if(videos.Count == 0) return Results.Json(new { result = true, mesg = "没有更多了" });
             List<long> ids = videos.Select(x => x.CreateUserId).ToList();
-         
-            string res = await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
+   
+            string res = await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
             List<UserVm> vms = JsonConvert.DeserializeObject<List<UserVm>>(res);  
             List<VideoListVm> videoVms = videos
                 .Zip(vms, (video, user) => new VideoListVm() { Title = video.Title,CreateTime = video.CreateTime
@@ -100,7 +104,7 @@ namespace VideoService.WebAPI.Controller
             UserVm userVm = null;
             try
             {
-                string res = await client.GetStringAsync("http://8.140.19.170/api/user/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
+                string res = await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints=[" + JsonConvert.SerializeObject(video.CreateUserId) + "]");
                 userVm = JsonConvert.DeserializeObject<List<UserVm>>(res)[0];
             }
             catch (Exception e)

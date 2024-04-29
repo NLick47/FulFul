@@ -26,7 +26,7 @@ public class VerificationCode
 };
     public static (string base64,string code) GetCaptcha()
     {
-        string randomText = GenerateRandomText(5); // 生成随机文本，这里生成 6 位随机字母和数字
+        string randomText = GenerateRandomText(4); // 生成随机文本，这里生成 6 位随机字母和数字
         string captchaText = randomText;
         Random random = new Random();
         using (SKBitmap bitmap = new SKBitmap(200, 50))
@@ -37,7 +37,7 @@ public class VerificationCode
 
                 using (SKPaint textPaint = new SKPaint())
                 {
-                    textPaint.TextSize = 25;
+                    textPaint.TextSize = 30;
                     textPaint.Typeface = SKTypeface.FromFile( "Fonts/BRITANIC.TTF");
                     float offsetX = 0; // 初始化偏移量
 
