@@ -127,6 +127,7 @@ namespace VideoService.WebAPI.Controller
                 LikeCount = video.LikeCount,
                 CollectCount = video.CollectCount,
                 Transpond = video.Transpond,
+                Description = video.Description,
                 Resouces =  video.VideoResouce.Select(x => new VideoVm.VideoResouce() { Id=x.Id,VideoSize=x.VideoSize,PlayerPath=x.PlayerPath }).ToList()
             };
             return Results.Json(new { result = true, data = vm });
@@ -208,22 +209,7 @@ namespace VideoService.WebAPI.Controller
             return Ok(new { result = true,data = videoVms });
         }
       
-        [HttpPost]
-        public async Task<IResult> GetComment(int videoId,int page,bool recom = true)
-        {
-            const int page_size = 20;
-            IQueryable<VideoComment> quer = videoDbContext.VideoComment.Include(x => x.Replys);
-          
-            if (recom)
-            {
-                quer.OrderByDescending(x => x.LikeCount);
-            }else
-            {
-                quer.OrderByDescending(x => x.CreateTime);
-            }
-            List<VideoComment> comms =  await quer.Where(x => x.VideoId == videoId).Skip((page-1) * page_size).Take(page_size).ToListAsync();
-            return Results.Json(new {result = true,data = comms});
-        }
+      
 
     }
 }

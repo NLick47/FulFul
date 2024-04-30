@@ -56,6 +56,7 @@ IdentityBuilder idBuilder = builder.Services.AddIdentityCore<User>(options =>
     //以下两行，把GenerateEmailConfirmationTokenAsync验证码缩短
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
     options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
+    options.User.AllowedUserNameCharacters = null;
 }
 );
     idBuilder = new IdentityBuilder(idBuilder.UserType, typeof(Role), builder.Services);

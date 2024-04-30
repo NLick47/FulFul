@@ -40,8 +40,8 @@ namespace DanmakuService.WebApi
 
             app.UseAuthentication();
             app.UseAuthorization();
-           
-            app.UseEndpoints(endpoints => {endpoints.MapHub<DanmakuHub>("/danmakuHub");  });
+       
+            app.MapHub<DanmakuHub>("/danmakuHub");
             app.MapControllers();
             app.Run();
         }

@@ -17,6 +17,8 @@ namespace VideoService.Infrastructure.Response
 
         public int LikeCount { get;  set; }
 
+        public string Description { get; set; }
+
         public int CollectCount { get;  set; }
 
         public int Transpond { get;  set; }

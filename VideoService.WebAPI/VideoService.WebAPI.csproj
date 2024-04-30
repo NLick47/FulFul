@@ -32,10 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Videos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\CommonInitializer\CommonInitializer.csproj" />
     <ProjectReference Include="..\VideoService.Domain\VideoService.Domain.csproj" />
     <ProjectReference Include="..\VideoService.Infrastructure\VideoService.Infrastructure.csproj" />
