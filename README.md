@@ -4,7 +4,7 @@
 
 ### 运行环境
 
-如果你想运行这个项目的话，请确保安装了mongdb，sqlserver，redis服务。你可以使用efcore的数据迁移来生成表。在此时之前，你需要在数据库中创建一张配置表
+如果你想运行这个项目的话，请确保安装了mongdb，sqlserver，redis，rabbitmq服务，也可以在commints历史中寻找到不使用mq的提交。你可以使用efcore的数据迁移来生成表。在此时之前，你需要在数据库中创建一张配置表。
 
 ```sql
     CREATE TABLE [dbo].[T_Configs](
@@ -35,6 +35,7 @@ INSERT [dbo].[T_Configs] ([Id], [Name], [Value]) VALUES (16, N'MongoDbSettings',
 "DatabaseName":"bi"
 }')
 INSERT [dbo].[T_Configs] ([Id], [Name], [Value]) VALUES (17, N'defaultAvatar', N'https://q7.itc.cn/q_70/images03/20240405/bd739544ef6c44cba8aed4fbc0fcc967.jpeg')
+INSERT [dbo].[T_Configs] ([Id], [Name], [Value]) VALUES (18, N'RabbitMQ', N'{"HostName":"127.0.0.1","ExchangeName":"bli_event_bus"}')
 SET IDENTITY_INSERT [dbo].[T_Configs] OFF
 
 ```
