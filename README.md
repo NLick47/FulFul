@@ -1,6 +1,6 @@
 ## 简介
 
-一个小型的视频网站后台，项目是学习.net6期间开发的。包含了用户，视频，弹幕。用到了ffmpeg，sqlserver，signalr，mongdb，redis。后台任务视频转码和分片，包含了hls加密解密。前端地址https://github.com/NLick47/VideoStation
+一个小型的视频网站后台，项目是学习.net6期间开发的。包含了用户，视频，弹幕。用到了ffmpeg，sqlserver，signalr，mongdb，redis，rabbitmq。你也可以在commints历史中寻找到不使用mq的历史。后台任务视频转码和分片，包含了hls加密解密。前端地址https://github.com/NLick47/VideoStation
 
 ### 运行环境
 
