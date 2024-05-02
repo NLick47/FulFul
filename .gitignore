@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+*.pub
+mic
+.vs/
+*.user
+*.suo
+*.csproj.user
+*.pubxml
+*.pubxml.user
+Dockerfile.*
+docker-compose*.yml
