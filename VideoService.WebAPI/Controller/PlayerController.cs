@@ -7,7 +7,7 @@ using VideoService.Infrastructure;
 
 namespace VideoService.WebAPI.Controller
 {
-    [Authorize]
+
     [Route("[controller]/[action]")]
     public class PlayerController : ControllerBase
     {
@@ -27,7 +27,6 @@ namespace VideoService.WebAPI.Controller
             this.accessor = accessor;
         }
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> AugmentPlayerCount(int videoId)
         {
             string key_id = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
@@ -56,27 +55,7 @@ namespace VideoService.WebAPI.Controller
             return Ok();
         }
 
-        /// <summary>
-        /// 
-        /// 后台任务删除资源
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <returns></returns>
-        /// 
-       
-        [HttpPost]
-        public async Task<IActionResult> RemoveResouce([FromBody]Dictionary<string,int> keys)
-        {
-           long u_id =  long.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-           int video_id = keys["videoId"];
-           var video = await videoDbContext.Video.FirstOrDefaultAsync(x => x.CreateUserId == u_id && x.Id == video_id);
-           if(video is null) return BadRequest(new { mesg = "要删除的资源不存在"});
-            videoDbContext.Remove(video);
-            videoDbContext.SaveChanges();
-            await redisConn.GetDatabase().SetAddAsync("delete_resource",video_id);
-            return Ok(new { result = true});
-        }
-        [AllowAnonymous]
+        
         [HttpGet]
         public async Task<IActionResult> Key(string ott)
         {

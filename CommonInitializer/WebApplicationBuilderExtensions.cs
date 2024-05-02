@@ -1,10 +1,14 @@
-﻿using Bli.JWT;
+﻿using Bli.EventBus;
+using Bli.JWT;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text.Json.Serialization;
@@ -29,13 +33,13 @@ namespace CommonInitializer
                 string connStr = builder.Configuration.GetValue<string>("DefaultDB:ConnStr"); ctx.UseSqlServer(connStr);
             }, assemblies);
 
+            //只要需要校验Authentication报文头的地方（非IdentityService.WebAPI项目）也需要启用这些
             builder.Services.AddAuthorization();
             builder.Services.AddAuthentication();
-          
+      
             JWTOptions jwtOpt = configuration.GetSection("JWT").Get<JWTOptions>();
             services.Configure<JWTOptions>(configuration.GetSection("JWT"));
             builder.Services.AddJWTAuthentication(jwtOpt);
-         
             builder.Services.Configure<SwaggerGenOptions>(c =>
             {
                 c.AddAuthenticationHeader();
@@ -45,7 +49,6 @@ namespace CommonInitializer
             {
                 // 统一设置路由前缀
                 opt.UseCentralRoutePrefix(new RouteAttribute("api"));
-
             }).AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 
             services.Configure<JsonOptions>(options =>
@@ -63,7 +66,22 @@ namespace CommonInitializer
                         .AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             }
            );
-            
+            services.AddLogging(builder =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                   .WriteTo.File(initOptions.LogFilePath)
+                   .CreateLogger();
+                builder.AddSerilog();
+            });
+
+            //services.AddFluentValidation(fv =>
+            //{
+            //    fv.RegisterValidatorsFromAssemblies(assemblies);
+            //});
+           
+            services.Configure<IntegrationEventRabbitMQOptions>(configuration.GetSection("RabbitMQ"));
+            services.AddEventBus(initOptions.EventBusQueueName, assemblies);
             string redisConnStr = configuration.GetValue<string>("Redis:ConnStr");
             IConnectionMultiplexer redisConnMultiplexer = ConnectionMultiplexer.Connect(redisConnStr);
             services.AddSingleton(typeof(IConnectionMultiplexer), redisConnMultiplexer);

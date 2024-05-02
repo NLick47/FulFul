@@ -9,14 +9,19 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="AsmResolver.DotNet" Version="4.11.2" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="10.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.13" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.13" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
 		<PackageReference Include="Zack.AnyDBConfigProvider" Version="1.1.4" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Bli.EventBus\Bli.EventBus.csproj" />
 	  <ProjectReference Include="..\Bli.JWT\Bli.JWT.csproj" />
 	</ItemGroup>
 

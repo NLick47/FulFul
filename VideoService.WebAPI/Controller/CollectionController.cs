@@ -163,8 +163,5 @@ namespace VideoService.WebAPI.Controller
             await _db.SaveChangesAsync();
             return Ok(new {result = true});
         }
-
-       
-
     }
 }

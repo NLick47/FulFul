@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bli.Common\Bli.Common.csproj" />
+    <ProjectReference Include="..\BliBli.Infrastructure\Bli.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

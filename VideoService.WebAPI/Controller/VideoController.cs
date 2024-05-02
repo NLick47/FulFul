@@ -1,9 +1,9 @@
 ﻿using Bli.Common;
+using Bli.EventBus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using SixLabors.ImageSharp;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -22,36 +22,37 @@ namespace VideoService.WebAPI.Controller
     [ApiController]
     public class VideoController : ControllerBase
     {
-        private readonly IVideoCommentService videoCommentService;
+      
         private readonly VideoDbContext videoDbContext;
         private readonly HttpClient client;
         private readonly IHttpContextAccessor accessor;
 
         private readonly ILogger<VideoController> _logger;
         private readonly IConfiguration configuration;
+        private readonly IEventBus eventBus;
 
-        public VideoController(IVideoCommentService videoCommentService, VideoDbContext videoDbContext,
-            ILogger<VideoController> logger,HttpClient client,IHttpContextAccessor accessor,IConfiguration configuration)
+        public VideoController( VideoDbContext videoDbContext,
+            ILogger<VideoController> logger,HttpClient client,IHttpContextAccessor accessor,IConfiguration configuration,
+            IEventBus bus)
         {
-            this.videoCommentService = videoCommentService;
             this.videoDbContext = videoDbContext;
             this._logger = logger;
             this.client = client;
             this.accessor = accessor;
             this.configuration = configuration;
+            this.eventBus = bus;
         }
       
         [HttpGet]
-        public async Task<IResult> VideoList(int curr_page,bool recom = true)
+        public async Task<IActionResult> VideoList(int curr_page,bool recom = true)
         {
             string token =HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-           
-            var cap = videoCommentService.ValidateToken(token);
+            var us = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             const int PageSize = 10;
             
             IQueryable<Video> query = videoDbContext.Video;       
-            if (!cap)
+            if (us is null)
             {
                 recom = true;
                 curr_page = 1;
@@ -61,7 +62,7 @@ namespace VideoService.WebAPI.Controller
                 query = query.OrderByDescending(x => x.LikeCount).ThenByDescending(x => x.PlayerCount);
             }
             List<Video> videos = await query.Skip(PageSize * (curr_page - 1)).Take(PageSize).Include(x => x.VideoResouce).ToListAsync();
-            if(videos.Count == 0) return Results.Json(new { result = true, mesg = "没有更多了" });
+            if(videos.Count == 0) return Ok(new { result = true, mesg = "没有更多了" });
             List<long> ids = videos.Select(x => x.CreateUserId).ToList();
    
             string res = await client.GetStringAsync($"{configuration.GetSection("UserServer").Value}/getusersbyids?ints=" + JsonConvert.SerializeObject(ids));
@@ -72,14 +73,14 @@ namespace VideoService.WebAPI.Controller
                 ,CoverUri= video.CoverUri,VideoType = video.VideoType,Id = video.Id
                 , user = user }).ToList();
 
-            return Results.Json(new { result = true,data = videoVms });
+            return Ok(new { result = true,data = videoVms });
         }
 
         [HttpGet("{id}")]
-        public async Task<IResult> GetVideo(int id)
+        public async Task<IActionResult> GetVideo(int id)
         {
             Video video = await videoDbContext.Video.Include(x => x.VideoResouce).SingleOrDefaultAsync(x => x.Id == id);
-            if (video is null) return Results.Json(new {result = false, mesg ="视频找不到了"});
+            if (video is null) return Ok(new {result = false, mesg ="视频找不到了"});
             var us = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
            
             bool isLikeed = false;
@@ -130,7 +131,7 @@ namespace VideoService.WebAPI.Controller
                 Description = video.Description,
                 Resouces =  video.VideoResouce.Select(x => new VideoVm.VideoResouce() { Id=x.Id,VideoSize=x.VideoSize,PlayerPath=x.PlayerPath }).ToList()
             };
-            return Results.Json(new { result = true, data = vm });
+            return Ok(new { result = true, data = vm });
         }
       
        
@@ -208,8 +209,19 @@ namespace VideoService.WebAPI.Controller
 
             return Ok(new { result = true,data = videoVms });
         }
-      
-      
 
+      
+        [HttpPost]
+        public async Task<IActionResult> RemoveVideo([FromBody] Dictionary<string, int> keys)
+        {
+            long u_id = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int video_id = keys["videoId"];
+            var video = await videoDbContext.Video.FirstOrDefaultAsync(x => x.CreateUserId == u_id && x.Id == video_id);
+            if (video is null) return BadRequest(new { mesg = "要删除的资源不存在" });
+            videoDbContext.Remove(video);
+            videoDbContext.SaveChanges();
+            eventBus.Publish("ResoueceRemove",video);
+            return Ok(new { result = true });
+        }
     }
 }

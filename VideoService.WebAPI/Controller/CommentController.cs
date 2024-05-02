@@ -50,9 +50,6 @@ namespace VideoService.WebAPI.Controller
             const int pageSize = 50;
             
             var (comments, totalRecords) = await repository.GetCommentsWithRepliesAsync(videoId, pageNumber, pageSize);
-           
-           
-
             List<UserVm> comUser = null;
             List<UserVm> repUser = null;
             var repsIds   = comments?.SelectMany(x => x.Replys)

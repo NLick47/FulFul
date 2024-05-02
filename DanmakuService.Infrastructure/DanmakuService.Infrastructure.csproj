@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bli.JWT\Bli.JWT.csproj" />
+    <ProjectReference Include="..\BliBli.Infrastructure\Bli.Infrastructure.csproj" />
     <ProjectReference Include="..\DanmakuService.Domain\DanmakuService.Domain.csproj" />
   </ItemGroup>
 

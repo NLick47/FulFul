@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Bli.Infrastructure.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VideoService.Domain.Entities.Enum;
+
 
 namespace VideoService.Domain.Entities
 {
@@ -21,15 +22,13 @@ namespace VideoService.Domain.Entities
             this.VideoType = videoType;
             this.VideoSecond= videoSecond;
             this.VideoResouce= resouces;
-          
         }
 
         public List<VideoResouce> VideoResouce { get; private set; }
 
         public int Id { get; private set; }
 
-        
-
+       
         public string Title { get;private set; }
         //视频简介
         public string? Description { get; private set; }

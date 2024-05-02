@@ -16,14 +16,10 @@ namespace VideoService.Infrastructure
     {
         public void Initialize(IServiceCollection services)
         {
-            services.AddScoped<IVideoCommentService, VideoCommentService>();
-            services.AddScoped<VideoUploadService>();   
-            services.AddScoped<VideoCommentRepository>();
-            services.AddScoped<CommentRepository>();
             services.AddScoped<IValidator<AddCommentRequest>, AddCommentRequestValidator>();
             services.AddScoped<IValidator<AddConnectionRequest>, AddConnectionRequstValidator>();
             services.AddScoped<IValidator<AddReplyRequest>, AddReplyRequestValidator>();
-            
+            services.AddScoped<CommentRepository>();
         }
     }
 }

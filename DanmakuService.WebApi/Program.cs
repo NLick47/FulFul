@@ -14,8 +14,8 @@ namespace DanmakuService.WebApi
             builder.ConfigureDbConfiguration();
             builder.ConfigureExtraServices(new InitializerOptions
             {
-                EventBusQueueName = "VideoService.WebAPI",
-                LogFilePath = "e:/temp/IdentityService.log"
+                EventBusQueueName = "DanmakuService.WebAPI",
+                LogFilePath = "D:/temp/DanmakuService.log"
             }); 
             // Add services to the container.
             builder.Services.AddAuthorization();
@@ -41,7 +41,7 @@ namespace DanmakuService.WebApi
             app.UseAuthentication();
             app.UseAuthorization();
        
-            app.MapHub<DanmakuHub>("/danmakuHub");
+            app.MapHub<DanmakuHub>("/hubs/danmakuHub");
             app.MapControllers();
             app.Run();
         }

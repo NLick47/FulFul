@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bli.Common\Bli.Common.csproj" />
     <ProjectReference Include="..\Bli.JWT\Bli.JWT.csproj" />
+  
     <ProjectReference Include="..\VideoService.Domain\VideoService.Domain.csproj" />
   </ItemGroup>
 

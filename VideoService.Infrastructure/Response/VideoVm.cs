@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Bli.Infrastructure.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VideoService.Domain.Entities.Enum;
+
 
 namespace VideoService.Infrastructure.Response
 {
