@@ -18,10 +18,10 @@ namespace DanmakuService.Infrastructure.Service
     {
         private readonly IMongoDatabase _database;
       
-        public ReDanmakuService(IOptionsSnapshot<MongoDbSettings> settings, IConnectionMultiplexer connectionMultiplexer)
-        {
-            var client = new MongoClient(settings.Value.ConnectionString);
-            _database = client.GetDatabase(settings.Value.DatabaseName);        }
+        public ReDanmakuService(IMongoDatabase mongoDatabase)
+        {    
+            _database = mongoDatabase;        
+        }
         public async Task AddDanmakuAsync(Danmaku danmaku)
         {
             var collections = _database.ListCollections(new ListCollectionsOptions { Filter = new BsonDocument("name", "dan" + danmaku.VideoID) });

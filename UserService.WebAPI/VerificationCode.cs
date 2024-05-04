@@ -24,7 +24,7 @@ public class VerificationCode
     SKColor.Parse("#0000FF"), // 蓝色
     
 };
-    public static (string base64,string code) GetCaptcha()
+    public static (string base64, string code) GetCaptcha()
     {
         string randomText = GenerateRandomText(4); // 生成随机文本，这里生成 6 位随机字母和数字
         string captchaText = randomText;
@@ -38,18 +38,18 @@ public class VerificationCode
                 using (SKPaint textPaint = new SKPaint())
                 {
                     textPaint.TextSize = 30;
-                    textPaint.Typeface = SKTypeface.FromFile( "Fonts/BRITANIC.TTF");
+                    textPaint.Typeface = SKTypeface.FromFile("Fonts/BRITANIC.TTF");
                     float offsetX = 0; // 初始化偏移量
 
 
                     for (int i = 0; i < captchaText.Length; i++)
                     {
-                        SKColor randomColor = new SKColor((byte)random.Next(256), (byte)random.Next(256), (byte)random.Next(256)); 
- 
+                        SKColor randomColor = new SKColor((byte)random.Next(256), (byte)random.Next(256), (byte)random.Next(256));
+
 
                         textPaint.Color = randomColor;
                         SKPoint textPosition = new SKPoint(10 + i * 25, 30); // 设置文字位置，每个字符水平间距为25
-                        canvas.DrawText(captchaText[i].ToString(),textPosition, textPaint);
+                        canvas.DrawText(captchaText[i].ToString(), textPosition, textPaint);
                     }
 
                     // 添加干扰线
@@ -68,7 +68,7 @@ public class VerificationCode
                         canvas.DrawLine(startPoint, endPoint, linePaint);
                     }
 
-                    for(int i=0;i<12;i++)
+                    for (int i = 0; i < 12; i++)
                     {
                         SKColor randomColor = colors[random.Next(colors.Length)];
                         SKPoint pointPosition = new SKPoint(random.Next(0, 200), random.Next(0, 50));
@@ -89,11 +89,11 @@ public class VerificationCode
                     byte[] imageBytes = stream.ToArray();
 
                     string base64Image = Convert.ToBase64String(imageBytes);
-                    return  ( base64Image, randomText);
+                    return (base64Image, randomText);
                 }
             }
         }
     }
 
-    
+
 }

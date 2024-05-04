@@ -111,9 +111,16 @@ namespace Resource.Infrastructure
             var db = redisConn.GetDatabase();
             
             //表单存在可能是上次没上传完成，返回true让前端再调用一次片段上传接口寻找缺失
-            bool exist =  await db.HashExistsAsync(form_hash,"Form");
-            if(exist) return new FormRespose() { Formhas = form_hash, Result = true };
-
+         
+            bool task_exits = await db.SetContainsAsync("video_transcoding_ready", form_hash);
+            if(task_exits)
+            {
+               return new FormRespose() { Formhas = string.Empty, Result = false,Mesg = "等一下，已经在转码了" };
+            }
+            bool form_exist = await db.HashExistsAsync(form_hash, "Form");
+            if (form_exist) {
+                return new FormRespose() { Formhas = form_hash, Result = true };
+            }
             string folder = Path.Combine(fileServer.Value.RootPath, $"{configuration.GetValue<string>("FilePath:ConverVideoSavePath")}", form_hash);
             string file_name = $"{Guid.NewGuid()}.{file.FileName.Split('.')[^1]}";
             try
@@ -137,7 +144,7 @@ namespace Resource.Infrastructure
             res.Cover = Path.Combine($"{configuration.GetValue<string>("FilePath:ConverVideoSavePath")}", form_hash, file_name);
            
             await db.HashSetAsync(form_hash, "Form", JsonConvert.SerializeObject(res));
-            await db.KeyExpireAsync(form_hash,TimeSpan.FromMinutes(30));
+            await db.KeyExpireAsync(form_hash,TimeSpan.FromHours(12));
             return new FormRespose() {Formhas = form_hash,Result = true };
         }
     }

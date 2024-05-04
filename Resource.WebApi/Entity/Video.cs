@@ -27,7 +27,7 @@ namespace Resource.WebApi.Entity
 
         public string Description { get; set; }
 
-        public long UserId{ get; set; }
+        
 
         public VideoType VideoType { get; set; }
 

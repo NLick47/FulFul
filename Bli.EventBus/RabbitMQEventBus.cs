@@ -71,7 +71,6 @@ namespace Bli.EventBus
             using (var channel = _persistentConnection.CreateModel())
             {
                 channel.ExchangeDeclare(exchange: _exchangeName, type: "direct");
-
                 byte[] body;
                 if (eventData == null)
                 {

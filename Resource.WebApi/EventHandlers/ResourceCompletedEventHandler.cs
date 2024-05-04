@@ -40,6 +40,11 @@ namespace Resource.WebApi.EventHandlers
             var redisValueDic = new Dictionary<int, Task<RedisValue>>();
             var db = redisConn.GetDatabase();
             string hashform = eventData.formHash;
+            bool exits = await db.HashExistsAsync(hashform, "Form");
+            if(!exits)
+            {
+                return;
+            }
             var res = JsonConvert.DeserializeObject<UploadVideoFormRequst>(await db.HashGetAsync(hashform,"Form"));
             var complete_path = Path.Combine(fileServer.Value.RootPath, $"{configuration.GetValue<string>("FilePath:VideoPath")}/{hashform}");
             var file_path = Path.Combine(complete_path, $"{hashform}");
@@ -70,8 +75,8 @@ namespace Resource.WebApi.EventHandlers
                                     await fws.WriteAsync(buffer, 0, r);
                                 }
                             }
-                            await fws.FlushAsync();
                         }
+                        await fws.FlushAsync();
                     }
                     batch = db.CreateBatch();
                     for (int i = 0; i < res.SliceCount; i++)
@@ -80,7 +85,6 @@ namespace Resource.WebApi.EventHandlers
                     }
                     batch.Execute();
                     await db.SetAddAsync("video_transcoding_ready", hashform);
-
                 }
             }
             catch (Exception ex)
@@ -92,7 +96,7 @@ namespace Resource.WebApi.EventHandlers
             {
                 try
                 {
-                    Directory.Delete(Path.Combine(fileServer.Value.RootPath,configuration.GetSection("ChunckVideoSavePath").Value, hashform));
+                    Directory.Delete(Path.Combine(fileServer.Value.RootPath,configuration.GetValue<string>("FilePath:ChunckVideoSavePath"),hashform),true);
                 }
                 catch (Exception e)
                 {

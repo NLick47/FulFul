@@ -4,8 +4,10 @@ using Bli.Infrastructure.Enum;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using VideoService.Domain.Entities;
 using VideoService.Infrastructure;
+using VideoService.Infrastructure.Response;
 
 namespace VideoService.WebAPI.EventHandler
 {
@@ -16,37 +18,40 @@ namespace VideoService.WebAPI.EventHandler
         private readonly IMongoDatabase _database;
         private readonly ILogger<VideoCreateEventHandler> _logger;
 
-        public VideoCreateEventHandler(IOptionsSnapshot<MongoDbSettings> options,VideoDbContext videoDb, ILogger<VideoCreateEventHandler> logger)
+        public VideoCreateEventHandler(IMongoDatabase mongo, VideoDbContext videoDb, ILogger<VideoCreateEventHandler> logger)
         {
-            _database = new MongoClient(options.
-               Value.ConnectionString).GetDatabase(options.
-               Value.DatabaseName);
+            _database = mongo;
             this.videoDb = videoDb;
            this._logger= logger;
         }
         public override async Task HandleDynamic(string eventName, dynamic eventData)
         {
-            Video video = new Video
-                (
+            List<VideoResouce> resouce = JsonConvert.DeserializeObject<List<VideoResouce>>(eventData.Resouces);
+            Video add = new Video(
                 eventData.Title,
-                eventData.Description ,
-                eventData.CreateUserId ,
+                eventData.Description,
+                eventData.CreateUserId,
                 eventData.CoverUri,
-                eventData.VideoType ,
+                Enum.Parse<VideoType>(eventData.VideoType),
                 eventData.VideoSecond,
-                eventData.VideoResouce 
+                resouce
                 );
 
-          int count = await videoDb.Video.Include(x => x.VideoResouce).Where(x => x.Title == video.Title && x.Description == video.Description
-            && x.VideoSecond == video.VideoSecond && x.CreateUserId == video.CreateUserId && x.VideoType == video.VideoType)
-                .CountAsync(v => v.VideoResouce.Any(r => video.VideoResouce.Any(x => x.PlayerPath == r.PlayerPath)));
-            if (count > 0) {
-               return;
+
+            var  video  =await videoDb.Video
+                .Include(x => x.VideoResouce)
+                .Where(x => x.Title == add.Title && x.Description == add.Description
+                    && x.VideoSecond == add.VideoSecond && x.CreateUserId == add.CreateUserId && x.VideoType == add.VideoType).SingleOrDefaultAsync();
+
+            if (video != null)
+            {
+                bool hasSameResources = add.VideoResouce.All(a => video.VideoResouce.Any(v => v.RawPath == a.RawPath));
+                if (hasSameResources) return;
             }
             try
             {
-                await videoDb.Video.AddAsync(video);
-                _database.CreateCollection("dan" + video.Id);
+                await videoDb.Video.AddAsync(add);
+                _database.CreateCollection("dan" + add.Id);
                 videoDb.SaveChanges();
             }
             catch (Exception e)

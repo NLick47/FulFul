@@ -12,5 +12,7 @@ namespace Resource.Daomain.Respose
         public DateTime DateTime { get;set;}
 
         public bool Result { get; set; }
+
+        public string Mesg { get; set; }
     }
 }
