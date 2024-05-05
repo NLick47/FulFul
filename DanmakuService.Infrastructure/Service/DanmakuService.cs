@@ -17,10 +17,11 @@ namespace DanmakuService.Infrastructure.Service
     public class ReDanmakuService : IDanService
     {
         private readonly IMongoDatabase _database;
-      
-        public ReDanmakuService(IMongoDatabase mongoDatabase)
-        {    
-            _database = mongoDatabase;        
+
+        public ReDanmakuService(IOptionsSnapshot<MongoDbSettings> settings)
+        {
+            var client = new MongoClient(settings.Value.ConnectionString);
+            _database = client.GetDatabase(settings.Value.DatabaseName);
         }
         public async Task AddDanmakuAsync(Danmaku danmaku)
         {

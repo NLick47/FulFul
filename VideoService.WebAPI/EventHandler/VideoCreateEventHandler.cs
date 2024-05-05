@@ -18,9 +18,10 @@ namespace VideoService.WebAPI.EventHandler
         private readonly IMongoDatabase _database;
         private readonly ILogger<VideoCreateEventHandler> _logger;
 
-        public VideoCreateEventHandler(IMongoDatabase mongo, VideoDbContext videoDb, ILogger<VideoCreateEventHandler> logger)
+        public VideoCreateEventHandler(IOptionsSnapshot<MongoDbSettings> settings, VideoDbContext videoDb, ILogger<VideoCreateEventHandler> logger)
         {
-            _database = mongo;
+            var client = new MongoClient(settings.Value.ConnectionString);
+            _database = client.GetDatabase(settings.Value.DatabaseName);
             this.videoDb = videoDb;
            this._logger= logger;
         }

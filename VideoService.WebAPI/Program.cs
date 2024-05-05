@@ -27,13 +27,7 @@ builder.Services.AddHttpClient();
 builder.Services.Configure<FileServiceOptions>(builder.Configuration.GetSection("FileServiceOptions"));
 builder.Services.Configure<MongoDbSettings>(
 builder.Configuration.GetSection("MongoDbSettings"));
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
-{
-    var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-    var client = new MongoClient(settings.ConnectionString);
-    var database = client.GetDatabase(settings.DatabaseName);
-    return database;
-});
+
 //登录、注册的项目除了要启用WebApplicationBuilderExtensions中的初始化之外，还要如下的初始化
 //不要用AddIdentity，而是用AddIdentityCore
 //因为用AddIdentity会导致JWT机制不起作用，AddJwtBearer中回调不会被执行，因此总是Authentication校验失败

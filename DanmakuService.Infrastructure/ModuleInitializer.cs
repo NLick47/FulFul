@@ -17,16 +17,8 @@ namespace DanmakuService.Infrastructure
     {
         public void Initialize(IServiceCollection services)
         {
-           services.AddScoped<IDanService, ReDanmakuService>();
+           services.AddSingleton<IDanService, ReDanmakuService>();
            services.AddScoped<IValidator<DanmakuRequst>, DanmakuRequstValidator>();
-            services.AddSingleton<IMongoDatabase>(sp =>
-            {
-                var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-                var client = new MongoClient(settings.ConnectionString);
-                var database = client.GetDatabase(settings.DatabaseName);
-                return database;
-            });
-
         }
     }
 }
